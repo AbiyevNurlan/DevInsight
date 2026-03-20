@@ -1,5 +1,5 @@
 import React from 'react';
-import CVUpload from './CVUpload';
+import CVUpload from '../../components/Candidate/CVUpload';
 
 const CVUploadPage: React.FC = () => {
   return (

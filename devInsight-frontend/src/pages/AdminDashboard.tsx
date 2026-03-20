@@ -3,12 +3,12 @@ import api from '../services/api'
 import adminService, {
   User, Interview, Company, Submission, AuditLog, PageResponse, Participant
 } from '../services/adminService'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import DataTable from '../components/DataTable'
 import Pagination from '../components/Pagination'
 import Modal from '../components/Modal'
 import { useToast } from '../components/Toast'
-import { Rocket, Calendar, FileText, Clock } from 'lucide-react'
+import { Rocket, Calendar, FileText } from 'lucide-react'
 
 // Tab type
 type TabType = 'overview' | 'users' | 'interviews' | 'companies' | 'submissions' | 'participants' | 'audit'
@@ -139,7 +139,6 @@ function StatusBadge({ status }: { status: string }) {
 import { StatCard } from '../components/ModernDashboard/StatCard';
 import { VacancyChart } from '../components/ModernDashboard/VacancyChart';
 import { SourceDonutChart } from '../components/ModernDashboard/SourceDonutChart';
-import { WorldMapWidget } from '../components/ModernDashboard/WorldMapWidget';
 import { CandidateTable } from '../components/ModernDashboard/CandidateTable';
 import { AIWidget } from '../components/ModernDashboard/AIWidget';
 import { motion } from 'framer-motion';
