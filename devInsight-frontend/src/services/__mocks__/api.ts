@@ -1,0 +1,28 @@
+const api = {
+  instance: { get: jest.fn(), post: jest.fn(), put: jest.fn(), patch: jest.fn(), delete: jest.fn() },
+  tokenKey: 'devinsight_jwt',
+  refreshKey: 'devinsight_refresh',
+  roleKey: 'devinsight_role',
+  isRefreshing: false,
+  queue: [],
+  getToken: jest.fn(() => null),
+  getRefreshToken: jest.fn(() => null),
+  setToken: jest.fn(),
+  setRefreshToken: jest.fn(),
+  clearTokens: jest.fn(),
+  clearToken: jest.fn(),
+  getRole: jest.fn(() => null),
+  setRole: jest.fn(),
+  isAdmin: jest.fn(() => false),
+  get: jest.fn(() => Promise.resolve({ data: {} })),
+  post: jest.fn(() => Promise.resolve({ data: {} })),
+  put: jest.fn(() => Promise.resolve({ data: {} })),
+  patch: jest.fn(() => Promise.resolve({ data: {} })),
+  delete: jest.fn(() => Promise.resolve({ data: {} })),
+  retry: jest.fn((fn: any) => fn()),
+  handleError: jest.fn(),
+  attemptRefresh: jest.fn(),
+  processQueue: jest.fn(),
+}
+
+export default api

@@ -10,7 +10,7 @@ interface Candidate {
 }
 
 interface CandidateTableProps {
-    candidates: Candidate[];
+    candidates?: Candidate[];
 }
 
 export const CandidateTable = ({ candidates = [] }: CandidateTableProps) => {

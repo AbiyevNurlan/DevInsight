@@ -16,7 +16,7 @@ export default function FaceDetection({ videoStream, onViolation, enabled = true
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [faceCount, setFaceCount] = useState(0)
   const [lastDetection, setLastDetection] = useState<Date | null>(null)
-  const detectionIntervalRef = useRef<NodeJS.Timeout>()
+  const detectionIntervalRef = useRef<ReturnType<typeof setInterval>>()
 
   // Simple face detection using pixel analysis
   const detectFaces = useCallback(async () => {
@@ -124,7 +124,7 @@ export default function FaceDetection({ videoStream, onViolation, enabled = true
       <canvas ref={canvasRef} className="hidden" />
       
       {/* Debug info (optional) */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <div className="fixed bottom-4 left-4 bg-slate-900/90 border border-white/10 rounded-lg p-3 text-xs">
           <div className="flex items-center gap-2 text-white">
             <Eye className="w-4 h-4" />

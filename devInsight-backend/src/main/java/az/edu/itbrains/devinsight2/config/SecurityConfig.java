@@ -71,6 +71,7 @@ public class SecurityConfig {
                         
                         // Role-based access control
                         .requestMatchers("/dashboard/**").hasAnyRole("ADMIN", "HR", "RECRUITER", "INTERVIEWER")
+                        .requestMatchers("/analytics/**").hasAnyRole("ADMIN", "HR", "RECRUITER", "INTERVIEWER")
                         .requestMatchers("/interviews/**").hasAnyRole("CANDIDATE", "HR", "ADMIN", "RECRUITER", "INTERVIEWER")
                         .requestMatchers("/submissions/**").hasAnyRole("CANDIDATE", "HR", "ADMIN", "RECRUITER", "INTERVIEWER")
                         .requestMatchers("/questions/**").hasAnyRole("HR", "ADMIN", "RECRUITER", "INTERVIEWER")
