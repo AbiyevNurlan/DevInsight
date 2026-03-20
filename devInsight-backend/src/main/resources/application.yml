@@ -1,0 +1,373 @@
+# ==================== DevInsight Application Configuration ====================
+spring:
+  application:
+    name: devinsight
+
+  profiles:
+    active: ${SPRING_PROFILE:dev}
+
+  devtools:
+    restart:
+      enabled: false
+
+  # ==================== Database Configuration ====================
+  datasource:
+    url: jdbc:postgresql://localhost:5432/DevInsight2
+    username: postgres
+    password: 123
+    driver-class-name: org.postgresql.Driver
+
+    hikari:
+      pool-name: DevInsightHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: true
+
+  # ==================== JPA Configuration ====================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        # Continue on schema update errors
+        hbm2ddl:
+          halt_on_error: false
+
+  # ==================== File Upload ====================
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+      file-size-threshold: 2MB
+
+# ==================== Server Configuration ====================
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
+
+  servlet:
+    context-path: /api
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: false
+        same-site: lax
+
+# ==================== JWT Configuration ====================
+jwt:
+  secret: ${JWT_SECRET:devinsight-super-secret-key-please-change-in-production-2024-very-long-secret}
+  expiration: 86400000 # 24 hours
+  refresh-expiration: 604800000 # 7 days
+  issuer: devinsight
+  header: Authorization
+  prefix: "Bearer "
+
+# ==================== AI Service Configuration ====================
+anthropic:
+  api-key: ${ANTHROPIC_API_KEY:}
+
+ai:
+  anthropic:
+    api-key: ${ANTHROPIC_API_KEY:}
+    api-url: https://api.anthropic.com/v1/messages
+    model: claude-sonnet-4-20250514
+    max-tokens: 2000
+    temperature: 0.7
+    timeout: 60000
+
+  analysis:
+    code:
+      enabled: true
+      max-length: 10000
+      timeout: 30000
+
+# ==================== Google Cloud Configuration ====================
+google:
+  cloud:
+    speech:
+      api-key: ${GOOGLE_SPEECH_API_KEY:}
+      language-code: az-AZ
+      sample-rate: 48000
+      encoding: LINEAR16
+
+    tts:
+      api-key: ${GOOGLE_TTS_API_KEY:}
+      language-code: az-AZ
+      voice-name: az-AZ-Standard-A
+      speaking-rate: 1.0
+      pitch: 0.0
+
+# ==================== AWS Configuration ====================
+aws:
+  credentials:
+    access-key: ${AWS_ACCESS_KEY:}
+    secret-key: ${AWS_SECRET_KEY:}
+
+  region: ${AWS_REGION:us-east-1}
+
+  s3:
+    bucket-name: ${AWS_S3_BUCKET:devinsight-videos}
+    video-folder: videos
+    code-folder: code
+    audio-folder: audios
+    url-expiration: 3600 # 1 hour
+
+# ==================== Interview Configuration ====================
+interview:
+  max-questions: 5
+  time-between-questions: 3000 # milliseconds
+  recording-timeout: 300000 # 5 minutes
+  ai-evaluation-timeout: 30000 # 30 seconds
+
+# ==================== Application Configuration ====================
+app:
+  name: DevInsight
+  version: 1.0.0
+  base-url: ${APP_BASE_URL:http://localhost:3000}
+  api-base-url: ${API_BASE_URL:http://localhost:8080/api}
+
+  # File Storage Configuration
+  file-storage:
+    cv-upload-dir: ${user.home}/devinsight/cvs
+    max-file-size: 5242880  # 5MB in bytes
+    allowed-types:
+      - application/pdf
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+  # CORS Configuration
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:3001}
+    allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+    allowed-headers: "*"
+    exposed-headers: Authorization,X-Total-Count
+    allow-credentials: true
+    max-age: 3600
+
+# ==================== Logging Configuration ====================
+logging:
+  level:
+    root: INFO
+    az.edu.itbrains.devinsight2: DEBUG
+    org.springframework.security: DEBUG
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+
+  file:
+    name: logs/devinsight.log
+    max-size: 10MB
+    max-history: 30
+    total-size-cap: 1GB
+
+# ==================== Actuator Configuration ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env,loggers
+      base-path: /actuator
+
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+
+  metrics:
+    enable:
+      jvm: true
+      process: true
+      system: true
+
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+
+# ==================== OpenAPI/Swagger Configuration ====================
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+    groups:
+      enabled: true
+
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    filter: true
+    display-request-duration: true
+    use-root-path: true
+    swagger-ui-enabled: true
+
+  show-actuator: false
+  use-fqn: false
+  scan-packages:
+    - az.edu.itbrains.devinsight2
+
+---
+# ==================== Development Profile ====================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+logging:
+  level:
+    com.devinsight: DEBUG
+    org.springframework.web: DEBUG
+    org.springdoc: DEBUG
+    org.springframework.messaging: DEBUG
+
+---
+
+# ==================== Production Profile ====================
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: DevInsightHikariPool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate   # prod üçün update əvəzinə validate daha təhlükəsizdir
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: true
+        same-site: strict
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+  refresh-expiration: 604800000
+  issuer: devinsight
+  header: Authorization
+  prefix: "Bearer "
+
+aws:
+  credentials:
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+  region: ${AWS_REGION:us-east-1}
+  s3:
+    bucket-name: ${AWS_S3_BUCKET}
+    video-folder: videos
+    code-folder: code
+    audio-folder: audios
+    url-expiration: 3600
+
+google:
+  cloud:
+    speech:
+      api-key: ${GOOGLE_SPEECH_API_KEY}
+      language-code: az-AZ
+      sample-rate: 48000
+      encoding: LINEAR16
+    tts:
+      api-key: ${GOOGLE_TTS_API_KEY}
+      language-code: az-AZ
+      voice-name: az-AZ-Standard-A
+      speaking-rate: 1.0
+      pitch: 0.0
+
+app:
+  name: DevInsight
+  version: 1.0.0
+  base-url: ${APP_BASE_URL:https://devinsight.com}
+  api-base-url: ${API_BASE_URL:https://api.devinsight.com}
+  
+  # File Storage Configuration (Production)
+  file-storage:
+    cv-upload-dir: ${CV_UPLOAD_DIR:/var/devinsight/cvs}
+    max-file-size: 5242880  # 5MB in bytes
+    allowed-types:
+      - application/pdf
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  
+  # CORS Configuration (Production)
+  cors:
+    allowed-origins: ${CORS_ORIGINS:https://devinsight.com}
+    allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+    allowed-headers: "*"
+    exposed-headers: Authorization,X-Total-Count
+    allow-credentials: true
+    max-age: 3600
+
+logging:
+  level:
+    root: WARN
+    com.devinsight: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+  file:
+    name: logs/devinsight-prod.log
+    max-size: 50MB
+    max-history: 60
+    total-size-cap: 2GB
+
+# ==================== Anthropic Claude API Configuration ====================
+anthropic:
+  api-key: ${ANTHROPIC_API_KEY:}
+  api-url: https://api.anthropic.com/v1/messages
+  model: claude-3-5-sonnet-20241022
+  max-tokens: 4096
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized

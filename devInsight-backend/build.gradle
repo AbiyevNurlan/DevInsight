@@ -1,0 +1,166 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.0'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'az.edu.itbrains'
+version = '1.0.0-SNAPSHOT'
+description = 'DevInsight - AI-Powered Technical Interview Platform'
+
+springBoot {
+    mainClass = 'az.edu.itbrains.devinsight2.DevInsight2Application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+    maven {
+        url "https://maven.google.com"
+    }
+    maven {
+        url "https://repo.maven.apache.org/maven2"
+    }
+}
+
+ext {
+    jwtVersion = '0.12.6'
+    awsSdkVersion = '2.28.29'
+    commonIoVersion = '2.18.0'
+    jacksonVersion = '2.18.2'
+    testcontainersVersion = '1.20.4'
+    googleCloudVersion = '2.25.0'
+}
+
+dependencies {
+    // ==================== Spring Boot Starters ====================
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // ==================== Database ====================
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // ==================== JWT Authentication ====================
+    implementation "io.jsonwebtoken:jjwt-api:${jwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jwtVersion}"
+
+    // ==================== AWS SDK (S3 for video/audio storage) ====================
+    implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:sts'
+
+    // ==================== Google Cloud APIs - DISABLED DUE TO DEPENDENCY CONFLICTS ====================
+    // Uncomment when dependency issues are resolved
+    // implementation 'com.google.cloud:google-cloud-speech:2.24.1'
+    // implementation 'com.google.cloud:google-cloud-texttospeech:2.23.0'
+
+    // ==================== Alternative: Use REST APIs instead of Google Cloud SDK ====================
+    // We'll use Google Cloud APIs via REST calls instead of Java SDK
+
+    // ==================== JSON Processing ====================
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+
+    // ==================== CV Text Extraction ====================
+    implementation 'org.apache.pdfbox:pdfbox:3.0.1'
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    implementation 'org.apache.poi:poi-scratchpad:5.2.3'
+
+    // ==================== Utilities ====================
+    implementation "commons-io:commons-io:${commonIoVersion}"
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // ==================== Lombok (Code Generation) ====================
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    // ==================== Development Tools ====================
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // ==================== API Documentation (Swagger/OpenAPI) ====================
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
+    // ==================== Monitoring & Metrics ====================
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    // ==================== Testing ====================
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
+    testImplementation 'io.projectreactor:reactor-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+    }
+}
+
+// ==================== Build Configuration ====================
+tasks.named('bootJar') {
+    archiveFileName = "devinsight-${version}.jar"
+
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Build-Time': new Date().format('yyyy-MM-dd HH:mm:ss')
+        )
+    }
+}
+
+// ==================== Code Quality ====================
+tasks.register('checkDependencies') {
+    doLast {
+        println "Checking for dependency updates..."
+        configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each {
+            println "${it.moduleVersion.id}"
+        }
+    }
+}
+
+// ==================== Docker Build Support ====================
+tasks.register('buildDocker') {
+    dependsOn bootJar
+    doLast {
+        exec {
+            commandLine 'docker', 'build', '-t', "devinsight:${version}", '.'
+        }
+    }
+}

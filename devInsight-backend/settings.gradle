@@ -1,0 +1,8 @@
+rootProject.name = 'DevInsight2'
+
+// Enable Gradle Build Cache for faster builds
+buildCache {
+    local {
+        enabled = true
+    }
+}
