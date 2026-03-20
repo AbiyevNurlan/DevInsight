@@ -12,9 +12,9 @@ spring:
 
   # ==================== Database Configuration ====================
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/DevInsight2}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:}
+    url: jdbc:postgresql://localhost:5432/DevInsight2
+    username: postgres
+    password: 123
     driver-class-name: org.postgresql.Driver
 
     hikari:
