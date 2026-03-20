@@ -13,6 +13,7 @@ import SubmissionForm from './pages/SubmissionForm'
 import Layout from './components/Layout'
 import AdminRoute from './components/AdminRoute'
 import HRRoute from './components/HRRoute'
+import ProtectedRoute from './components/ProtectedRoute'
 import { ToastProvider } from './components/Toast'
 
 // HR Pages
@@ -343,34 +344,98 @@ function AppContent() {
               </AdminRoute>
             } />
 
-            {/* Candidate Routes */}
-            <Route path="/candidate" element={<CandidateDashboard />} />
-            <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
-            <Route path="/candidate/profile" element={<CandidateProfile />} />
-            <Route path="/candidate/cv-upload" element={<CVUploadPage />} />
-            <Route path="/candidate/gamification" element={<GamificationDashboard />} />
-            <Route path="/candidate/mock-interview" element={<MockInterviewPage />} />
-            <Route path="/candidate/post-interview-chat" element={<PostInterviewChatPage />} />
-            <Route path="/gamification" element={<GamificationDashboard />} />
+            {/* Candidate Routes — server-verified JWT guard */}
+            <Route path="/candidate" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <CandidateDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/candidate/dashboard" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <CandidateDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/candidate/profile" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <CandidateProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/candidate/cv-upload" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN', 'HR']}>
+                <CVUploadPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/candidate/gamification" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <GamificationDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/candidate/mock-interview" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <MockInterviewPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/candidate/post-interview-chat" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <PostInterviewChatPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/gamification" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <GamificationDashboard />
+              </ProtectedRoute>
+            } />
 
-            {/* Common Routes */}
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/interviews" element={<InterviewList />} />
-            <Route path="/interviews/:id" element={<InterviewDetail />} />
+            {/* Common Routes — require any authenticated user */}
+            <Route path="/profile" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'RECRUITER', 'INTERVIEWER', 'CANDIDATE']}>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/interviews" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'RECRUITER', 'INTERVIEWER', 'CANDIDATE']}>
+                <InterviewList />
+              </ProtectedRoute>
+            } />
+            <Route path="/interviews/:id" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'RECRUITER', 'INTERVIEWER', 'CANDIDATE']}>
+                <InterviewDetail />
+              </ProtectedRoute>
+            } />
             <Route path="/interviews/:id/manage" element={
               <HRRoute>
                 <InterviewManager />
               </HRRoute>
             } />
-            <Route path="/interviews/:id/complete" element={<InterviewComplete />} />
-            <Route path="/interviews/:interviewId/submit" element={<SubmissionForm />} />
+            <Route path="/interviews/:id/complete" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'RECRUITER', 'INTERVIEWER', 'CANDIDATE']}>
+                <InterviewComplete />
+              </ProtectedRoute>
+            } />
+            <Route path="/interviews/:interviewId/submit" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <SubmissionForm />
+              </ProtectedRoute>
+            } />
 
             {/* New Submission Routes */}
-            <Route path="/interview/:id/submit" element={<InterviewSubmissionPage />} />
-            <Route path="/submissions/:id" element={<NewSubmissionResultsPage />} />
+            <Route path="/interview/:id/submit" element={
+              <ProtectedRoute allowedRoles={['CANDIDATE', 'ADMIN']}>
+                <InterviewSubmissionPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/submissions/:id" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'RECRUITER', 'INTERVIEWER', 'CANDIDATE']}>
+                <NewSubmissionResultsPage />
+              </ProtectedRoute>
+            } />
 
             {/* Modern Dashboard 2026 */}
-            <Route path="/modern-dashboard" element={<ModernDashboard />} />
+            <Route path="/modern-dashboard" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'HR', 'RECRUITER', 'INTERVIEWER', 'CANDIDATE']}>
+                <ModernDashboard />
+              </ProtectedRoute>
+            } />
           </Routes>
         </motion.div>
       </AnimatePresence>
