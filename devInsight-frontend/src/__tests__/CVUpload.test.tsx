@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CVUpload from '../components/Candidate/CVUpload'
 
@@ -120,7 +120,6 @@ describe('CVUpload Component', () => {
 
     // Use fireEvent.change for more reliable file input simulation
     Object.defineProperty(input, 'files', { value: [file] })
-    const { fireEvent } = require('@testing-library/react')
     fireEvent.change(input)
 
     await waitFor(() => {
