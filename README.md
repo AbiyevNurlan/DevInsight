@@ -1,5 +1,7 @@
 # DevInsight
 
+[![CI](https://github.com/AbiyevNurlan/DevInsight/actions/workflows/ci.yml/badge.svg)](https://github.com/AbiyevNurlan/DevInsight/actions/workflows/ci.yml) ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
+
 A technical interview platform for running coding interviews and reviewing candidates. Companies create interviews from a question bank, and candidates submit solutions. Reviewers then see automated scoring, analytics, and LLM-assisted analysis next to their own decision.
 
 **Stack:** Java 21 · Spring Boot 4 · Spring Security (JWT) · PostgreSQL · WebSocket/STOMP · React 18 · TypeScript · Vite · Tailwind · Jest · Playwright
@@ -20,19 +22,27 @@ A technical interview platform for running coding interviews and reviewing candi
 
 ## Architecture
 
-```
-devInsight-frontend/   React + TypeScript SPA (Vite)
-        │  REST (JWT bearer)  ·  STOMP over WebSocket
-        ▼
-devInsight-backend/    Spring Boot API, context path /api
-  ├─ controller/       REST + WebSocket endpoints, grouped by domain
-  ├─ interview/        interview domain: entities, services, AI evaluation services
-  ├─ cv/               CV upload, text extraction, AI analysis
-  ├─ security/         JWT filter, token utilities, user details
-  └─ service/, repository/, model/, dto/
-        │
-        ▼
-PostgreSQL             schema in src/main/resources/sql
+```mermaid
+flowchart LR
+    subgraph Client
+        SPA["React + TypeScript SPA<br/>(Vite)"]
+    end
+    subgraph Backend["Spring Boot API · /api"]
+        SEC["JWT filter"]
+        REST["REST controllers"]
+        WS["STOMP endpoints<br/>/ws-interview"]
+        INT["interview domain<br/>scoring · questions · audit"]
+        CV["cv domain<br/>upload · extraction · analysis"]
+    end
+    DB[("PostgreSQL")]
+    LLM["Anthropic API"]
+
+    SPA -- "REST + bearer token" --> SEC --> REST
+    SPA <-- "live events" --> WS
+    REST --> INT & CV
+    WS --> INT
+    INT & CV --> DB
+    INT & CV -. "optional" .-> LLM
 ```
 
 Key design choices:
@@ -41,7 +51,7 @@ Key design choices:
 - **Stateless auth:** JWT access and refresh tokens. The secret and lifetimes come from configuration.
 - **AI behind services:** each LLM-backed capability is its own service class, so models and prompts can be swapped without touching controllers.
 
-A detailed data-flow write-up for the CV analysis feature is in [docs/architecture-cv-analysis.md](docs/architecture-cv-analysis.md).
+Decisions and their trade-offs are recorded as [ADRs](docs/adr/README.md). A detailed data-flow write-up for the CV analysis feature is in [docs/architecture-cv-analysis.md](docs/architecture-cv-analysis.md).
 
 ## Running locally
 
@@ -79,5 +89,6 @@ cd devInsight-frontend && npm run test:e2e      # Playwright
 devInsight-backend/     Spring Boot service
 devInsight-frontend/    React client
 docs/                   architecture notes
+docs/adr/               architecture decision records
 docs/archive/           development notes kept for history
 ```
