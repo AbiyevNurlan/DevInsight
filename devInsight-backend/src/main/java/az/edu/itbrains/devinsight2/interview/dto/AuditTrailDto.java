@@ -22,7 +22,7 @@ public class AuditTrailDto {
     
     // Decision Details
     private String decisionMaker; // AI_MODEL, HR_USER, SYSTEM
-    private String modelVersion; // e.g., "claude-3-5-sonnet-20241022"
+    private String modelVersion; // e.g., "claude-opus-5-5"
     private Map<String, Object> inputData;
     private Map<String, Object> outputData;
     

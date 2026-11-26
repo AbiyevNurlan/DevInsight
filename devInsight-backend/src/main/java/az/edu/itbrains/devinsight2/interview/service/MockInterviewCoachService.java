@@ -1,5 +1,6 @@
 package az.edu.itbrains.devinsight2.interview.service;
 
+import az.edu.itbrains.devinsight2.ai.ClaudeResponses;
 import az.edu.itbrains.devinsight2.interview.dto.MockInterviewRequestDto;
 import az.edu.itbrains.devinsight2.interview.dto.MockInterviewResponseDto;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,7 +25,8 @@ public class MockInterviewCoachService {
     private String anthropicApiKey;
 
     private static final String CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
-    private static final String CLAUDE_MODEL = "claude-3-5-sonnet-20241022";
+    @Value("${anthropic.model:claude-opus-5-5}")
+    private String claudeModel;
 
     // Active mock interview sessions
     private final ConcurrentHashMap<String, MockSessionState> activeSessions = new ConcurrentHashMap<>();
@@ -444,10 +446,11 @@ public class MockInterviewCoachService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-api-key", anthropicApiKey);
         headers.set("anthropic-version", "2023-06-01");
+        headers.set("anthropic-beta", "server-side-fallback-2026-07-01");
 
         Map<String, Object> body = Map.of(
-                "model", CLAUDE_MODEL,
-                "max_tokens", 2000,
+                "model", claudeModel,
+                "max_tokens", 16000, "fallbacks", "default",
                 "messages", List.of(Map.of("role", "user", "content", prompt))
         );
 
@@ -455,7 +458,7 @@ public class MockInterviewCoachService {
             ResponseEntity<JsonNode> response = restTemplate.exchange(
                     CLAUDE_API_URL, HttpMethod.POST, new HttpEntity<>(body, headers), JsonNode.class);
             if (response.getBody() != null && response.getBody().has("content")) {
-                return response.getBody().get("content").get(0).get("text").asText();
+                return ClaudeResponses.text(response.getBody().get("content"));
             }
         } catch (Exception e) {
             log.error("Claude API call failed: {}", e.getMessage());

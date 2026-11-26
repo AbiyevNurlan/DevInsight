@@ -1,5 +1,6 @@
 package az.edu.itbrains.devinsight2.interview.service;
 
+import az.edu.itbrains.devinsight2.ai.ClaudeResponses;
 import az.edu.itbrains.devinsight2.interview.dto.CodeOriginalityRequestDto;
 import az.edu.itbrains.devinsight2.interview.dto.CodeOriginalityResponseDto;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,8 +27,9 @@ public class CodeOriginalityService {
     private String anthropicApiKey;
 
     private static final String CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
-    private static final String CLAUDE_MODEL = "claude-3-5-sonnet-20241022";
-    private static final int MAX_TOKENS = 3000;
+    @Value("${anthropic.model:claude-opus-5-5}")
+    private String claudeModel;
+    private static final int MAX_TOKENS = 16000;
 
     public CodeOriginalityResponseDto analyzeOriginality(CodeOriginalityRequestDto request) {
         if (anthropicApiKey == null || anthropicApiKey.isEmpty()) {
@@ -137,10 +139,12 @@ public class CodeOriginalityService {
         headers.set("Content-Type", "application/json");
         headers.set("x-api-key", anthropicApiKey);
         headers.set("anthropic-version", "2023-06-01");
+        headers.set("anthropic-beta", "server-side-fallback-2026-07-01");
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", CLAUDE_MODEL);
+        requestBody.put("model", claudeModel);
         requestBody.put("max_tokens", MAX_TOKENS);
+        requestBody.put("fallbacks", "default");
         requestBody.put("messages", Collections.singletonList(
                 Map.of("role", "user", "content", prompt)
         ));
@@ -162,7 +166,7 @@ public class CodeOriginalityService {
             JsonNode root = objectMapper.readTree(jsonResponse);
             JsonNode contentArray = root.path("content");
             if (contentArray.isArray() && !contentArray.isEmpty()) {
-                String content = contentArray.get(0).path("text").asText();
+                String content = ClaudeResponses.text(contentArray);
                 JsonNode node = objectMapper.readTree(content);
 
                 List<String> styleIndicators = new ArrayList<>();

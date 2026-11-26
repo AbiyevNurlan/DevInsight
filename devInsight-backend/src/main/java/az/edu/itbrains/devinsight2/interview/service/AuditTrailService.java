@@ -1,5 +1,7 @@
 package az.edu.itbrains.devinsight2.interview.service;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import az.edu.itbrains.devinsight2.interview.dto.AuditTrailDto;
 import az.edu.itbrains.devinsight2.interview.entity.AuditTrailEntity;
 import az.edu.itbrains.devinsight2.interview.repository.AuditTrailRepository;
@@ -21,7 +23,8 @@ public class AuditTrailService {
     private final AuditTrailRepository auditTrailRepository;
     private final ObjectMapper objectMapper;
     
-    private static final String MODEL_VERSION = "claude-3-5-sonnet-20241022";
+    @Value("${anthropic.model:claude-opus-5-5}")
+    private String modelVersion;
     
     /**
      * Log AI decision for audit trail
@@ -47,7 +50,7 @@ public class AuditTrailService {
                 .action(action)
                 .timestamp(LocalDateTime.now())
                 .decisionMaker("AI_MODEL")
-                .modelVersion(MODEL_VERSION)
+                .modelVersion(modelVersion)
                 .inputData(objectMapper.writeValueAsString(inputData))
                 .outputData(objectMapper.writeValueAsString(outputData))
                 .score(score)

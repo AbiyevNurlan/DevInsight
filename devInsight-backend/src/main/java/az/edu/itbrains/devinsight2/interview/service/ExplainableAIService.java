@@ -1,5 +1,6 @@
 package az.edu.itbrains.devinsight2.interview.service;
 
+import az.edu.itbrains.devinsight2.ai.ClaudeResponses;
 import az.edu.itbrains.devinsight2.interview.dto.ScorecardDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +36,7 @@ public class ExplainableAIService {
     @Value("${anthropic.api-url:https://api.anthropic.com/v1/messages}")
     private String anthropicApiUrl;
     
-    @Value("${anthropic.model:claude-3-5-sonnet-20241022}")
+    @Value("${anthropic.model:claude-opus-5-5}")
     private String modelVersion;
     
     /**
@@ -174,11 +175,13 @@ public class ExplainableAIService {
             HttpHeaders headers = new HttpHeaders();
             headers.set("x-api-key", anthropicApiKey);
             headers.set("anthropic-version", "2023-06-01");
+            headers.set("anthropic-beta", "server-side-fallback-2026-07-01");
             headers.set("Content-Type", "application/json");
             
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", modelVersion);
-            requestBody.put("max_tokens", 4000);
+            requestBody.put("max_tokens", 16000);
+            requestBody.put("fallbacks", "default");
             requestBody.put("messages", List.of(
                 Map.of("role", "user", "content", prompt)
             ));
@@ -193,8 +196,7 @@ public class ExplainableAIService {
             );
             
             JsonNode responseNode = objectMapper.readTree(response.getBody());
-            JsonNode contentNode = responseNode.path("content").get(0).path("text");
-            String aiText = contentNode.asText();
+            String aiText = ClaudeResponses.text(responseNode.path("content"));
             
             // Extract JSON from AI response
             String jsonContent = extractJsonFromText(aiText);

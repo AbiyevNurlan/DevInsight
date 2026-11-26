@@ -1,5 +1,6 @@
 package az.edu.itbrains.devinsight2.interview.service;
 
+import az.edu.itbrains.devinsight2.ai.ClaudeResponses;
 import az.edu.itbrains.devinsight2.interview.dto.SkillGapAnalysisRequestDto;
 import az.edu.itbrains.devinsight2.interview.dto.SkillGapAnalysisResponseDto;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,8 +31,9 @@ public class SkillGapAnalysisService {
     private String anthropicApiKey;
     
     private static final String CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
-    private static final String CLAUDE_MODEL = "claude-3-5-sonnet-20241022";
-    private static final int MAX_TOKENS = 2048;
+    @Value("${anthropic.model:claude-opus-5-5}")
+    private String claudeModel;
+    private static final int MAX_TOKENS = 16000;
     
     /**
      * Analyze skill gaps between current and target role
@@ -107,10 +109,12 @@ public class SkillGapAnalysisService {
         headers.set("Content-Type", "application/json");
         headers.set("x-api-key", anthropicApiKey);
         headers.set("anthropic-version", "2023-06-01");
+        headers.set("anthropic-beta", "server-side-fallback-2026-07-01");
         
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", CLAUDE_MODEL);
+        requestBody.put("model", claudeModel);
         requestBody.put("max_tokens", MAX_TOKENS);
+        requestBody.put("fallbacks", "default");
         requestBody.put("messages", Collections.singletonList(
             Map.of("role", "user", "content", prompt)
         ));
@@ -138,7 +142,7 @@ public class SkillGapAnalysisService {
             JsonNode contentArray = rootNode.path("content");
             
             if (contentArray.isArray() && contentArray.size() > 0) {
-                String content = contentArray.get(0).path("text").asText();
+                String content = ClaudeResponses.text(contentArray);
                 JsonNode analysisNode = objectMapper.readTree(content);
                 
                 return SkillGapAnalysisResponseDto.builder()

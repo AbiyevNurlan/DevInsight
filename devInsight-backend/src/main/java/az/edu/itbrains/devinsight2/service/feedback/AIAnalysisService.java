@@ -1,5 +1,6 @@
 package az.edu.itbrains.devinsight2.service.feedback;
 
+import az.edu.itbrains.devinsight2.ai.ClaudeResponses;
 import az.edu.itbrains.devinsight2.model.core.Analysis;
 import az.edu.itbrains.devinsight2.model.question.Question;
 import az.edu.itbrains.devinsight2.model.submission.Submission;
@@ -125,6 +126,7 @@ public class AIAnalysisService {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", model);
             requestBody.put("max_tokens", maxTokens);
+            requestBody.put("fallbacks", "default");
             requestBody.put("messages", List.of(
                     Map.of("role", "user", "content", prompt)
             ));
@@ -133,6 +135,7 @@ public class AIAnalysisService {
                     .baseUrl(apiUrl)
                     .defaultHeader("x-api-key", apiKey)
                     .defaultHeader("anthropic-version", "2023-06-01")
+                    .defaultHeader("anthropic-beta", "server-side-fallback-2026-07-01")
                     .defaultHeader("content-type", "application/json")
                     .build();
 
@@ -145,7 +148,7 @@ public class AIAnalysisService {
 
             // Extract text from Claude response
             JsonNode jsonNode = objectMapper.readTree(response);
-            return jsonNode.get("content").get(0).get("text").asText();
+            return ClaudeResponses.text(jsonNode.get("content"));
 
         } catch (Exception e) {
             log.error("Claude API call failed: ", e);

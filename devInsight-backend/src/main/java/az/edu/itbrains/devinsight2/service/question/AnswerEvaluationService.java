@@ -1,5 +1,6 @@
 package az.edu.itbrains.devinsight2.service.question;
 
+import az.edu.itbrains.devinsight2.ai.ClaudeResponses;
 import az.edu.itbrains.devinsight2.model.interview.InterviewQuestion;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -143,6 +144,7 @@ public class AnswerEvaluationService {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", model);
             requestBody.put("max_tokens", maxTokens);
+            requestBody.put("fallbacks", "default");
             requestBody.put("messages", List.of(
                     Map.of("role", "user", "content", prompt)
             ));
@@ -152,6 +154,7 @@ public class AnswerEvaluationService {
                     .baseUrl(apiUrl)
                     .defaultHeader("x-api-key", apiKey)
                     .defaultHeader("anthropic-version", "2023-06-01")
+                    .defaultHeader("anthropic-beta", "server-side-fallback-2026-07-01")
                     .defaultHeader("content-type", "application/json")
                     .build();
 
@@ -177,7 +180,7 @@ public class AnswerEvaluationService {
 
             // Extract text from response
             JsonNode jsonNode = objectMapper.readTree(response);
-            String responseText = jsonNode.get("content").get(0).get("text").asText();
+            String responseText = ClaudeResponses.text(jsonNode.get("content"));
 
             log.debug("Claude API response received, length: {}", responseText.length());
 
